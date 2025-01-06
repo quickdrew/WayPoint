@@ -73,9 +73,11 @@
   }
 
 
-  const mapboxAccessToken = 'your-mapbox-api-key'; 
+  const mapboxAccessToken = 'your-mapbox-api-key'; // Replace with your Mapbox access token
 
-  
+
+
+
   // Function to draw a route between waypoints
   async function drawRoute() {
     const coords = waypoints.map(wp => `${wp[1]},${wp[0]}`).join(';');
