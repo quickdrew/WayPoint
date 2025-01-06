@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dynamic Trip Planner with GPT</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <style>
+    #map {
+      height: 80vh;
+      width: 100%;
+    }
+    #gpt-interface {
+      margin: 10px auto;
+      padding: 20px;
+      max-width: 600px;
+      background: #f4f4f4;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    #response {
+      margin-top: 15px;
+      padding: 10px;
+      background: #e8f5e9;
+      border: 1px solid #c8e6c9;
+      border-radius: 5px;
+      font-family: monospace;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+
+  <div id="gpt-interface">
+    <h2>Plan Your Trip with GPT</h2>
+    <textarea id="prompt" rows="3" style="width: 100%;">Suggest some destinations for a trip starting from San Francisco.</textarea>
+    <label for="distanceLimit">Max Distance from Route (miles):</label>
+    <input type="number" id="distanceLimit" value="50" style="width: 80px; margin-left: 10px;" />
+    <button id="submitPrompt" style="margin-top: 10px;">Submit</button>
+    <button id="resetMap" style="margin-top: 10px; margin-left: 10px;">Reset</button>
+    <div id="response"></div>
+    <h3>Raw GPT Response</h3>
+    <pre id="raw-response" style="background: #f9f9f9; border: 1px solid #ccc; padding: 10px; white-space: pre-wrap;"></pre>
+  </div>
+   
+  
+
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script>
+    const map = L.map('map').setView([37.7749, -122.4194], 5);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors',
+  }).addTo(map);
+
+  let waypoints = [];
+  let markers = [];
+  let routes = [];
+
+  // Function to add a destination to the map
+  function addDestination(lat, lng, name, description) {
+    const marker = L.marker([lat, lng])
+      .addTo(map)
+      .bindPopup(`<strong>${name}</strong><br>${description}`)
+      .on('click', function () {
+        this.openPopup();
+      });
+
+    markers.push(marker);
+    waypoints.push([lat, lng]);
+
+    if (waypoints.length > 1) drawRoute();
+  }
+
+
+  const mapboxAccessToken = 'Place mapbox api key here'; 
+  // Function to draw a route between waypoints
+  async function drawRoute() {
+    const coords = waypoints.map(wp => `${wp[1]},${wp[0]}`).join(';');
+    const url = `https://api.mapbox.com/directions/v5/mapbox/driving/${coords}?geometries=geojson&access_token=${mapboxAccessToken}`;
+    try {
+      const response = await fetch(url);
+      const data = await response.json();
+      const route = data.routes[0].geometry.coordinates.map(([lng, lat]) => [lat, lng]);
+      const polyline = L.polyline(route, { color: 'blue', weight: 4 }).addTo(map);
+      routes.push(polyline);
+    } catch (error) {
+      console.error('Error fetching route:', error);
+    }
+  }
+
+  // Reset function to clear map and reset waypoints
+  function resetMap() {
+    // Remove all markers
+    markers.forEach(marker => map.removeLayer(marker));
+    markers = [];
+
+    // Remove all routes
+    routes.forEach(route => map.removeLayer(route));
+    routes = [];
+
+    // Reset waypoints
+    waypoints = [];
+  }
+
+  // Add event listener for reset button
+  document.getElementById('resetMap').addEventListener('click', resetMap);
+
+  // Add event listener for the GPT submit button (unchanged)
+  document.getElementById('submitPrompt').addEventListener('click', async () => {
+    const prompt = document.getElementById('prompt').value;
+    const distanceLimit = parseInt(document.getElementById('distanceLimit').value, 10) || 50; // Default to 50 if empty
+    const responseDiv = document.getElementById('response');
+    const rawResponseDiv = document.getElementById('raw-response');
+
+    responseDiv.innerHTML = 'Loading...';
+    rawResponseDiv.textContent = ''; // Clear raw response
+
+    try {
+      const response = await fetch('/gpt', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ prompt, distanceLimit, routeCoords: waypoints }),
+      });
+
+      const data = await response.json();
+
+      // Display raw GPT response
+      rawResponseDiv.textContent = JSON.stringify(data, null, 2);
+
+      if (data.destinations && data.destinations.length > 0) {
+        responseDiv.innerHTML = 'Destinations added to the map!';
+        data.destinations.forEach(dest => {
+          addDestination(dest.lat, dest.lng, dest.name, dest.description);
+        });
+      } else {
+        responseDiv.innerHTML = 'No destinations were suggested.';
+      }
+    } catch (error) {
+      responseDiv.innerHTML = 'Error fetching response: ' + error.message;
+      rawResponseDiv.textContent = error.stack || error.message;
+    }
+  });
+
+
+
+
+  </script>
+</body>
+</html>
