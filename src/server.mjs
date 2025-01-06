@@ -5,7 +5,7 @@ import OpenAI from 'openai';
 
 // Initialize OpenAI
 const openai = new OpenAI({
-    apiKey: "Place Chatgbt API key here"
+    apiKey: "your-openai-api-key"
 });
 
 const app = express();
