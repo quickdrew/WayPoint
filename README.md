@@ -1,9 +1,10 @@
 # WayPoint
 A dynmaic trip planner that uses OpenAI API and OpenSourceMaps.
 
+![WayPoint User Interface](/photos/WayPointUI.png)
+
 ## Overview
 **WayPoint** is a web-based application that leverages OpenAI's GPT model and Mapbox Directions API to assist users in planning trips. The app dynamically suggests destinations along a route based on user preferences and displays them on an interactive map using Leaflet.js.
-
 
 ## Features
 - **GPT-Powered Destination Suggestions**: Generates travel stops based on user input and a specified distance limit.
@@ -75,6 +76,7 @@ node server.js
 ```
 .
 WAYPOINT/
+├── photos/                    # Photos for README.md
 ├── src/
 │   ├── node_modules/          # Installed dependencies
 │   ├── index.html             # Frontend for the application
