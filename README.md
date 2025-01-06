@@ -22,8 +22,8 @@ A dynmaic trip planner that uses OpenAI API and OpenSourceMaps.
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/your-username/dynamic-trip-planner.git
-cd dynamic-trip-planner
+git clone https://github.com/your-username/WayPoint.git
+cd WayPoint
 ```
 
 ### 2. Install Dependencies
