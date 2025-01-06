@@ -1,5 +1,5 @@
 # WayPoint
-A dynmaic trip planner that uses OpenAI API and OpenSourceMaps.
+A dynmaic trip planner that uses OpenAI API, OpenSourceMaps, and Mapbox Directions API.
 
 ![WayPoint User Interface](/photos/WayPointUI.png)
 
