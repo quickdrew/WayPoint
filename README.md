@@ -45,6 +45,7 @@ npm install
 ### 4. Start the Server
 Run the server with the following command:
 ```bash
+cd src
 node server.js
 ```
 
